@@ -1,6 +1,5 @@
+import java.time.LocalDate
 import java.util.*
-import kotlin.math.roundToInt
-import kotlin.system.exitProcess
 
 //Totes aquelles funcions que interactuen amb l'usuari (scanner) no tenen tests unitaris, ja que no es poden testar.
 
@@ -42,7 +41,8 @@ fun payment(scanner: Scanner, price: Double): Double {
             money += userMoney
             println("Import ingressat: $money")
             if (money < price) {
-                println("Import restant: ${price - money}")
+                val remaining = price - money
+                println("Import restant: ${"%.2f".format(remaining)}€")
             }
         } else {
             println("Moneda o bitllet no vàlid. Torna a insertar.")
@@ -82,17 +82,30 @@ fun calculateChange(money: Double, price: Double): Double {
  * @param scanner: per a la resposta de l'usuari.
  * @author Daniel Reinosa, Joel Montalvan, Nikita Barbosa
  */
-//todo hacer que se vea bonito y poner fecha
-fun printTickets(completedTickets: MutableList<CompletedPurchase>, scanner: Scanner) {
-    println("Desitja tiquet en paper? (S/N): ")
+fun printPurchaseReceipt(completedTickets: MutableList<CompletedPurchase>, scanner: Scanner) {
+    print("Desitja tiquet de compra en paper? (S/N): ")
     val userAnswer = getYesOrNo(scanner)
     if (userAnswer) {
-        println("--------TIQUET---------")
+        println(
+            """
+        -----------------------------------
+        |             Tiquet              |
+        -----------------------------------
+        Data: ${LocalDate.now()}
+        """.trimIndent()
+        )
+        println()
         for (ticket in completedTickets) {
             ticket.printTicket()
         }
         val totalPrice = calculateTotalPrice(completedTickets)
-        println("Preu total: ${"%.2f".format(totalPrice)}€.")
+        println(
+            """
+            
+        Total: ${"%.2f".format(totalPrice)}€
+        -----------------------------------
+        """.trimIndent()
+        )
     }
 }
 
@@ -158,12 +171,12 @@ fun purchaseTicket(scanner: Scanner, ticketList: List<Ticket>): CompletedPurchas
 
 /**
  * Calcula el preu total de la transacció. Recorre la llista de tiquets comprats i suma el preu de cada tiquet amb la funció calculatePrice, que pertany a la classe Ticket.
- * @param completedTickets: llista de tiquets comprats per l'usuari.
+ * @param purchasedTickets: llista de tiquets comprats per l'usuari.
  * @return Double amb el preu total de la compra.
  */
-fun calculateTotalPrice(completedTickets: MutableList<CompletedPurchase>): Double {
+fun calculateTotalPrice(purchasedTickets: MutableList<CompletedPurchase>): Double {
     var totalPrice = 0.0
-    for (ticket in completedTickets) {
+    for (ticket in purchasedTickets) {
         totalPrice += ticket.ticket.calculatePrice(ticket.zone)
     }
     return totalPrice
@@ -199,8 +212,9 @@ fun isCartFull(cart: MutableList<CompletedPurchase>): Boolean {
  * @author Daniel Reinosa, Joel Montalvan, Nikita Barbosa
  */
 fun endPurchase(userCart: MutableList<CompletedPurchase>, scanner: Scanner) {
-    printTickets(userCart, scanner)
+    printPurchaseReceipt(userCart, scanner)
     println("Gràcies per utilitzar la màquina de venda. Adéu!")
+    println()
 }
 
 /**
@@ -236,6 +250,3 @@ fun stopMachine(scanner: Scanner) {
     exitProcess(0)
 }
 */
-
-
-
